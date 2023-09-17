@@ -33,17 +33,60 @@ TOKEN :
 |    < NAME: ( <LETTER>  ( <LETTER > | < DIGIT >)* )>
 |    < NUM: (  < DIGIT >)+ >
 
-
 }
+
+TOKEN :
+{
+    < PLUS: "+" >
+|   < MULT: "*" >
+|   < CONS: "cons" >
+|   < LIST: "list" >
+|   < CAR: "car" >
+|   < CDR: "cdr" >
+|   < CHS: "chs" >
+|   < SQR: "sqr" >
+|   < APP: "app" >
+|   < MAP: "map" >
+|   < NIL: "nil" >
+}
+
+
+
 
 
 
 void sExp():
 {}
 {
-< NUM >
-|  "(" ( "+"   (sExp())* ")"
-|     "*"   (sExp())* ")")
+    < NUM >
+|   < NAME >
+|   "(" < PLUS > (sExp())+ ")"
+|   "(" < MULT > (sExp())+ ")"
+|   "(" < CONS > sExp() sExp() ")"
+|   "(" < LIST > (sExp())* ")"
+|   "(" < CAR > sExp() ")"
+|   "(" < CDR > sExp() ")"
+|   "(" < CHS > sExp() ")"
+|   "(" < SQR > sExp() ")"
+|   "(" < APP > sExp() sExp() ")"
+|   "(" < MAP > < NAME > sExp() ")"
+}
+
+void sExp() returns [int value]:
+{ int tempValue; }
+{
+    < NUM > { value = Integer.parseInt(token.image); }
+|   "(" < PLUS > sExp() { value = tempValue = $sExp.value; } (sExp() { value += $sExp.value; })* ")"
+|   "(" < MULT > sExp() { value = tempValue = $sExp.value; } (sExp() { value *= $sExp.value; })* ")"
+|   "(" < CONS > sExp() sExp() ")"
+|   "(" < LIST > (sExp())* ")" 
+|   "(" < CAR > sExp() ")" 
+|   "(" < CDR > sExp() ")" 
+|   "(" < CHS > sExp() { value = -$sExp.value; } ")"
+|   "(" < SQR > sExp() { value = $sExp.value * $sExp.value; } ")"
+|   "(" < APP > sExp() sExp() ")" 
+|   "(" < MAP > < NAME > sExp() ")" 
+
 }
 
 
